@@ -1,13 +1,12 @@
 import csv
-import datetime as dt
 import pandas
+import datetime as dt
+import matplotlib.pyplot as plt
 from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 from numpy import NaN
 from IPython.display import display
-from statistics import median, mode
-import matplotlib.pyplot as plt
-import numpy as np
+from statistics import mode
 
 headerIndexDict = {}
 

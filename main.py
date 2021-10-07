@@ -106,7 +106,7 @@ def getLivedDays(dob_obj, dod_obj):
 
     return ((a-b).days)
 
-def prettyPrint(header, list):
+def prettyPrintPrezList(header, list):
     list.insert(0, header)
     df = pandas.DataFrame(list[:11])
     display(df)
@@ -145,7 +145,7 @@ def calcMedian(list):
         print(row)
 
     length = len(list2)
-    # print("length is ", length)
+
     medianEl1 = 0
     medianEl2 = 0
     if length % 2 == 1:
@@ -167,10 +167,7 @@ def calcMode(list):
     listDays = []
     for row in list:
         listDays.append(row[headerIndexDict['lived_days']])
-    # print(set(listDays))
 
-    # mode = max(set(listDays), key = listDays.count)
-    # print('Mode is - ', mode)
     modeVal = mode(listDays)
     print('Mode is - ', modeVal)
     print('** Mode prints the highest occuring value, if all are distinct, it selects the first values as puts that up as the mode **')
@@ -184,7 +181,6 @@ def calcMax(list):
         livedDays = row[livedDaysIndex]
         if (livedDays > max) :
             max = livedDays
-
     print("Maximum ", max)
     return max
 
@@ -195,10 +191,22 @@ def calcMin(list):
         livedDays = row[livedDaysIndex]
         if (livedDays < min) :
             min = livedDays
-
     print("Minimum ", min)
     return min
 
+def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min):
+    list = []
+    list.append(['Mean', mean])
+    list.append(['Weighted Mean', weighted_mean])
+    list.append(['Median', median])
+    list.append(['Mode', mode])
+    list.append(['Max', max])
+    list.append(['Min', min])
+
+    df = pandas.DataFrame(list)
+    pandas.set_option("precision", 3)
+
+    display(df)
 
 def main():
     header, rows = readCSVFile()
@@ -216,18 +224,20 @@ def main():
 
     leastLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']))
     print('Least Lived Presidents')
-    prettyPrint(header, leastLivedPrez)
+    prettyPrintPrezList(header, leastLivedPrez)
     print('\n')
     
     mostLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']), reverse=True)
     print('Most Lived Presidents')
-    prettyPrint(header, mostLivedPrez)
+    prettyPrintPrezList(header, mostLivedPrez)
 
-    calcMean(rows)
-    calcWeightedMean(rows)
-    calcMedian(rows)
-    calcMode(rows)
-    calcMax(rows)
-    calcMin(rows)
+    mean = calcMean(rows)
+    weighted_mean = calcWeightedMean(rows)
+    # median = calcMedian(rows)
+    # mode = calcMode(rows)
+    # max = calcMax(rows)
+    # min = calcMin(rows)
+    # prettyPrintStatistics(mean, weighted_mean, median, mode, max, min)
+    
 
 main()

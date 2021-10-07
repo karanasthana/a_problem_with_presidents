@@ -1,8 +1,10 @@
 import csv
 import datetime as dt
+import pandas
 from dateutil.relativedelta import relativedelta
-
+from operator import itemgetter
 from numpy import NaN
+from IPython.display import display
 
 headerIndexDict = {}
 
@@ -30,7 +32,6 @@ def cleanup_data(rows):
     dodIndex = headerIndexDict['DEATH DATE']
 
     for row in rows:
-        print(row[0])
         dobDateStr = row[dobIndex]
         dobDateStrArr = dobDateStr.split(' ')
 
@@ -38,14 +39,11 @@ def cleanup_data(rows):
         row[dobIndex] = dobDateStr
 
         dodDateStr = row[dodIndex]
-        print(dodDateStr)
         if (dodDateStr != ''):
             dodDateStrArr = dodDateStr.split(' ')
 
-            print(dodDateStrArr)
             dodDateStr = dodDateStrArr[0][:3] + ' ' + dodDateStrArr[1] + ' ' + dodDateStrArr[2]
             row[dodIndex] = dodDateStr
-        print('\n')
 
 def populate_data(header, rows):
     birthDateIndex = headerIndexDict['BIRTH DATE']
@@ -69,7 +67,8 @@ def populate_data(header, rows):
         row.append(getLivedYears(dob_dt_obj, dod_dt_obj))
         row.append(getLivedMonths(dob_dt_obj, dod_dt_obj, row[livedYearsIndex]))
         row.append(getLivedDays(dob_dt_obj, dod_dt_obj))
-        print(row)
+    
+    return rows
 
 def getBirthYear(dob_dt_obj):
     dob_year = dob_dt_obj.year
@@ -106,19 +105,35 @@ def getLivedDays(dob_obj, dod_obj):
 
     return ((a-b).days)
 
+def prettyPrint(header, list):
+    list.insert(0, header)
+    df = pandas.DataFrame(list[:11])
+    display(df)
+
 
 def main():
     header, rows = readCSVFile()
 
     header = addNewHeaders(header)
 
-    # Initializing a dictionary to store the indices of the new columns
+    # Initializing dictionary to store the indices of the new columns
     i=0
     for (val) in header:
         headerIndexDict[val] = i
         i = i + 1
 
     cleanup_data(rows)
-    populate_data(header, rows)
+    rows = populate_data(header, rows)
+
+    leastLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']))
+
+    print('Least Lived Presidents')
+    prettyPrint(header, leastLivedPrez)
+    print('\n')
+    
+    mostLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']), reverse=True)
+    
+    print('Most Lived Presidents')
+    prettyPrint(header, mostLivedPrez)
 
 main()

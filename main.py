@@ -194,7 +194,20 @@ def calcMin(list):
     print("Minimum ", min)
     return min
 
-def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min):
+def calcSD(list):
+    livedDaysIndex = headerIndexDict['lived_days']
+    mean = calcMean(list)
+
+    sigmaVal = 0;
+    for row in list:
+        sigmaVal = sigmaVal + ((row[livedDaysIndex] - mean) ** 2)
+    
+    before_root_val = sigmaVal / (len(list) - 1)
+    standard_deviation = (before_root_val ** 0.5)
+    print('Standard Deviation ', standard_deviation)
+    return standard_deviation
+
+def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min, standard_deviation):
     list = []
     list.append(['Mean', mean])
     list.append(['Weighted Mean', weighted_mean])
@@ -202,6 +215,7 @@ def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min):
     list.append(['Mode', mode])
     list.append(['Max', max])
     list.append(['Min', min])
+    list.append(['Standard Deviation', standard_deviation])
 
     df = pandas.DataFrame(list)
     pandas.set_option("precision", 3)
@@ -237,7 +251,8 @@ def main():
     mode = calcMode(rows)
     max = calcMax(rows)
     min = calcMin(rows)
-    prettyPrintStatistics(mean, weighted_mean, median, mode, max, min)
+    standard_deviation = calcSD(rows)
+    prettyPrintStatistics(mean, weighted_mean, median, mode, max, min, standard_deviation)
     
 
 main()

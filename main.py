@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 from numpy import NaN
 from IPython.display import display
+from statistics import mode
 
 headerIndexDict = {}
 
@@ -110,6 +111,94 @@ def prettyPrint(header, list):
     df = pandas.DataFrame(list[:11])
     display(df)
 
+def calcMean(list):
+    count=0
+    total=0
+    livedDaysIndex = headerIndexDict['lived_days']
+
+    for row in list:
+        total = total + row[livedDaysIndex]
+        count = count + 1
+
+    return (total/count)
+
+def calcWeightedMean(list):
+    count = 0
+    total = 0
+    weight = (1/len(list))
+    livedDaysIndex = headerIndexDict['lived_days']
+
+    for row in list:
+        total = total + (row[livedDaysIndex] * weight)
+        count = count + (weight)
+
+    return (total/count)
+
+def calcMedian(list):
+    print("test Median")
+    display(pandas.DataFrame(list))
+
+    # Sorting the list as per ascending order of number of days lived
+    list2 = sorted(list, key=itemgetter(headerIndexDict['lived_days']))
+
+    for row in list2:
+        print(row)
+
+    length = len(list2)
+    # print("length is ", length)
+    medianEl1 = 0
+    medianEl2 = 0
+    if length % 2 == 1:
+        medianEl1 = (int)((length + 1) / 2)
+        medianEl2 = (int)((length + 1) / 2)
+    else:
+        medianEl1 = ((int)(length/2))
+        medianEl2 = (((int)(length/2) + 1))
+
+    val1 = list2[medianEl1][headerIndexDict['lived_days']]
+    val2 = list2[medianEl2][headerIndexDict['lived_days']]
+
+    median = (val1 + val2) / 2
+    
+    print('median days lived', median)
+    return median
+
+def calcMode(list):
+    listDays = []
+    for row in list:
+        listDays.append(row[headerIndexDict['lived_days']])
+    # print(set(listDays))
+
+    # mode = max(set(listDays), key = listDays.count)
+    # print('Mode is - ', mode)
+    modeVal = mode(listDays)
+    print('Mode is - ', modeVal)
+    print('** Mode prints the highest occuring value, if all are distinct, it selects the first values as puts that up as the mode **')
+    return modeVal
+    
+
+def calcMax(list):
+    livedDaysIndex = headerIndexDict['lived_days']
+    max = list[0][livedDaysIndex]
+    for row in list:
+        livedDays = row[livedDaysIndex]
+        if (livedDays > max) :
+            max = livedDays
+
+    print("Maximum ", max)
+    return max
+
+def calcMin(list):
+    livedDaysIndex = headerIndexDict['lived_days']
+    min = list[0][livedDaysIndex]
+    for row in list:
+        livedDays = row[livedDaysIndex]
+        if (livedDays < min) :
+            min = livedDays
+
+    print("Minimum ", min)
+    return min
+
 
 def main():
     header, rows = readCSVFile()
@@ -126,14 +215,19 @@ def main():
     rows = populate_data(header, rows)
 
     leastLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']))
-
     print('Least Lived Presidents')
     prettyPrint(header, leastLivedPrez)
     print('\n')
     
     mostLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']), reverse=True)
-    
     print('Most Lived Presidents')
     prettyPrint(header, mostLivedPrez)
+
+    calcMean(rows)
+    calcWeightedMean(rows)
+    calcMedian(rows)
+    calcMode(rows)
+    calcMax(rows)
+    calcMin(rows)
 
 main()

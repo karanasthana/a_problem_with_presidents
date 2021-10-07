@@ -5,7 +5,9 @@ from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 from numpy import NaN
 from IPython.display import display
-from statistics import mode
+from statistics import median, mode
+import matplotlib.pyplot as plt
+import numpy as np
 
 headerIndexDict = {}
 
@@ -107,9 +109,20 @@ def getLivedDays(dob_obj, dod_obj):
     return ((a-b).days)
 
 def prettyPrintPrezList(header, list):
+    fig, ax = plt.subplots()
+
+    # hide axes
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+
     list.insert(0, header)
-    df = pandas.DataFrame(list[:11])
-    display(df)
+    df = pandas.DataFrame(list[1:11], columns=header)
+
+    ax.table(cellText=df.values, colLabels=df.columns, colColours=(['lightblue'] * len(header)))
+    fig.tight_layout()
+    plt.show()
+
 
 def calcMean(list):
     count=0
@@ -217,10 +230,67 @@ def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min, standard_
     list.append(['Min', min])
     list.append(['Standard Deviation', standard_deviation])
 
-    df = pandas.DataFrame(list)
-    pandas.set_option("precision", 3)
+    # df = pandas.DataFrame(list)
+    # pandas.set_option("precision", 3)
 
-    display(df)
+    fig, ax = plt.subplots()
+
+    # hide axes
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+
+    list.insert(0, ['Type', 'Value'])
+    df = pandas.DataFrame(list[1:], columns=list[0])
+
+    ax.table(cellText=df.values, colLabels=df.columns, colColours=(['lightblue'] * 2))
+    fig.tight_layout()
+    plt.show()
+
+def showDataOnGraph(rows):
+    tlist = list(zip(*rows))
+    xaxis = tlist[0]
+    yaxis = tlist[8]
+
+    # computations to fetch the values of statistical data
+    num_rows = len(rows)
+    mean_value = calcMean(rows)
+    median_value = calcMedian(rows)
+    mode_value = calcMode(rows)
+    max_value = calcMax(rows)
+    min_value = calcMin(rows)
+    sd_value = calcSD(rows)
+
+    # temporary computations to create list equal to the computed values
+    y_mean = [mean_value] * num_rows
+    y_median = [median_value] * num_rows
+    y_mode = [mode_value] * num_rows
+    y_max = [max_value] * num_rows
+    y_min = [min_value] * num_rows
+    y_sd_max = [mean_value + sd_value] * num_rows
+    y_sd_min = [mean_value - sd_value] * num_rows
+
+    # gca is used to Get the Current Axis
+    ax = plt.gca()
+    
+    # Rotating the X-axis values by 90 to make them visible
+    ax.tick_params(axis='x', labelrotation = 90)
+
+    mean_line = ax.plot(xaxis, y_mean, label='Mean - ' + str(format(mean_value, ".3f")), linestyle='--')
+    median_line = ax.plot(xaxis, y_median, label='Median - ' + str(median_value), linestyle=':')
+    mode_line = ax.plot(xaxis, y_mode, label='Mode - ' + str(mode_value), linestyle='-')
+    max_line = ax.plot(xaxis, y_max, label='Max - ' + str(max_value), linestyle='dotted')
+    min_line = ax.plot(xaxis, y_min, label='Min - ' + str(min_value), linestyle='dotted')
+    # sd_max_line = ax.plot(xaxis, y_sd_max, label='Standard Deviation (+ve)', linestyle='-.')
+    # sd_min_line = ax.plot(xaxis, y_sd_min, label='Standard Deviation (-ve)', linestyle='-.')
+
+    # Filling color between the two values of Standard Deviation
+    ax.fill_between(xaxis, y_sd_min, y_sd_max, color='blue', alpha=0.15, label='Standard Deviation')
+
+    legend = ax.legend(loc='lower left')
+
+    plt.plot(xaxis, yaxis)
+    plt.show()
 
 def main():
     header, rows = readCSVFile()
@@ -254,5 +324,6 @@ def main():
     standard_deviation = calcSD(rows)
     prettyPrintStatistics(mean, weighted_mean, median, mode, max, min, standard_deviation)
     
+    showDataOnGraph(rows)
 
 main()

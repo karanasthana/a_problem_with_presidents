@@ -233,11 +233,11 @@ def main():
 
     mean = calcMean(rows)
     weighted_mean = calcWeightedMean(rows)
-    # median = calcMedian(rows)
-    # mode = calcMode(rows)
-    # max = calcMax(rows)
-    # min = calcMin(rows)
-    # prettyPrintStatistics(mean, weighted_mean, median, mode, max, min)
+    median = calcMedian(rows)
+    mode = calcMode(rows)
+    max = calcMax(rows)
+    min = calcMin(rows)
+    prettyPrintStatistics(mean, weighted_mean, median, mode, max, min)
     
 
 main()

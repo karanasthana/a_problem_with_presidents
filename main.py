@@ -47,38 +47,32 @@ def cleanup_data(rows):
             row[dodIndex] = dodDateStr
         print('\n')
 
-def populate_rows(header, rows):
-    # populate columns for headers
+def populate_data(header, rows):
     birthDateIndex = headerIndexDict['BIRTH DATE']
     deathDateIndex = headerIndexDict['DEATH DATE']
-    yearBirthIndex = headerIndexDict['year_of_birth']
-    livedYearsIndex = headerIndexDict['lived_years']
-    livedMonthsIndex = headerIndexDict['lived_months']
 
-    print('year birth index is ', yearBirthIndex)
-    print(rows[0])
+    livedYearsIndex = headerIndexDict['lived_years']
 
     for row in rows:
         dob = row[birthDateIndex]
-        dod = row[deathDateIndex]
+        dob_dt_obj = dt.datetime.strptime(dob, '%b %d, %Y')
         if dob == NaN:
             continue
 
-        row.append(getBirthYear(dob))
-
-        dob_dt_obj = dt.datetime.strptime(dob, '%b %d, %Y')
+        dod = row[deathDateIndex]
         dod_dt_obj = ''
         if dod != '':
             dod_dt_obj = dt.datetime.strptime(dod, '%b %d, %Y')
 
+
+        row.append(getBirthYear(dob_dt_obj))
         row.append(getLivedYears(dob_dt_obj, dod_dt_obj))
         row.append(getLivedMonths(dob_dt_obj, dod_dt_obj, row[livedYearsIndex]))
         row.append(getLivedDays(dob_dt_obj, dod_dt_obj))
         print(row)
 
-def getBirthYear(dob_str):
-    date_time_obj = dt.datetime.strptime(dob_str, '%b %d, %Y')
-    dob_year = date_time_obj.year
+def getBirthYear(dob_dt_obj):
+    dob_year = dob_dt_obj.year
     return dob_year
 
 def getLivedYears(dob_obj, dod_obj):
@@ -103,17 +97,14 @@ def getLivedDays(dob_obj, dod_obj):
     if (effective_dod_obj == ''):
         today_str = dt.datetime.strftime(dt.date.today(), '%b %d, %Y')
         effective_dod_obj = dt.datetime.strptime(today_str, '%b %d, %Y')
-    
+
     date_format = "%m/%d/%Y"
     a = dt.datetime.strftime(effective_dod_obj, date_format)
     a = dt.datetime.strptime(a, '%m/%d/%Y').date()
     b = dt.datetime.strftime(dob_obj, date_format)
     b = dt.datetime.strptime(b, '%m/%d/%Y').date()
-    
+
     return ((a-b).days)
-
-    
-
 
 
 def main():
@@ -128,6 +119,6 @@ def main():
         i = i + 1
 
     cleanup_data(rows)
-    populate_rows(header, rows)
+    populate_data(header, rows)
 
 main()

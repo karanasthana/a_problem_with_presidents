@@ -9,6 +9,8 @@ from IPython.display import display
 from statistics import mode
 
 headerIndexDict = {}
+spacedDateFormat = '%b %d, %Y'
+slashedDateFormat = '%m/%d/%Y'
 
 def readCSVFile():
     rows = []
@@ -33,36 +35,36 @@ def cleanup_data(rows):
     dobIndex = headerIndexDict['BIRTH DATE']
     dodIndex = headerIndexDict['DEATH DATE']
 
+    # Converting all 4 lettered months into consistent 3 lettered months (e.g. July to Jul & June to Jun)
     for row in rows:
         dobDateStr = row[dobIndex]
         dobDateStrArr = dobDateStr.split(' ')
 
-        dobDateStr = dobDateStrArr[0][:3] + ' ' + dobDateStrArr[1] + ' ' + dobDateStrArr[2]
+        dobDateStr = '{} {} {}'.format(dobDateStrArr[0][:3], dobDateStrArr[1], dobDateStrArr[2])
         row[dobIndex] = dobDateStr
 
         dodDateStr = row[dodIndex]
         if (dodDateStr != ''):
             dodDateStrArr = dodDateStr.split(' ')
 
-            dodDateStr = dodDateStrArr[0][:3] + ' ' + dodDateStrArr[1] + ' ' + dodDateStrArr[2]
+            dodDateStr = '{} {} {}'.format(dodDateStrArr[0][:3], dodDateStrArr[1], dodDateStrArr[2])
             row[dodIndex] = dodDateStr
 
 def populate_data(header, rows):
     birthDateIndex = headerIndexDict['BIRTH DATE']
     deathDateIndex = headerIndexDict['DEATH DATE']
-
     livedYearsIndex = headerIndexDict['lived_years']
 
     for row in rows:
         dob = row[birthDateIndex]
-        dob_dt_obj = dt.datetime.strptime(dob, '%b %d, %Y')
+        dob_dt_obj = dt.datetime.strptime(dob, spacedDateFormat)
         if dob == NaN:
             continue
 
         dod = row[deathDateIndex]
         dod_dt_obj = ''
         if dod != '':
-            dod_dt_obj = dt.datetime.strptime(dod, '%b %d, %Y')
+            dod_dt_obj = dt.datetime.strptime(dod, spacedDateFormat)
 
 
         row.append(getBirthYear(dob_dt_obj))
@@ -78,17 +80,19 @@ def getBirthYear(dob_dt_obj):
 
 def getLivedYears(dob_obj, dod_obj):
     effective_dod_obj = dod_obj
+
     if (effective_dod_obj == ''):
-        today_str = dt.datetime.strftime(dt.date.today(), '%b %d, %Y')
-        effective_dod_obj = dt.datetime.strptime(today_str, '%b %d, %Y')
+        today_str = dt.datetime.strftime(dt.date.today(), spacedDateFormat)
+        effective_dod_obj = dt.datetime.strptime(today_str, spacedDateFormat)
     
     return (relativedelta(effective_dod_obj, dob_obj).years)
 
 def getLivedMonths(dob_obj, dod_obj, total_years):
     effective_dod_obj = dod_obj
+
     if (effective_dod_obj == ''):
-        today_str = dt.datetime.strftime(dt.date.today(), '%b %d, %Y')
-        effective_dod_obj = dt.datetime.strptime(today_str, '%b %d, %Y')
+        today_str = dt.datetime.strftime(dt.date.today(), spacedDateFormat)
+        effective_dod_obj = dt.datetime.strptime(today_str, spacedDateFormat)
     
     return (relativedelta(effective_dod_obj, dob_obj).months + (total_years * 12))
 
@@ -96,14 +100,14 @@ def getLivedMonths(dob_obj, dod_obj, total_years):
 def getLivedDays(dob_obj, dod_obj):
     effective_dod_obj = dod_obj
     if (effective_dod_obj == ''):
-        today_str = dt.datetime.strftime(dt.date.today(), '%b %d, %Y')
-        effective_dod_obj = dt.datetime.strptime(today_str, '%b %d, %Y')
+        today_str = dt.datetime.strftime(dt.date.today(), spacedDateFormat)
+        effective_dod_obj = dt.datetime.strptime(today_str, spacedDateFormat)
 
-    date_format = "%m/%d/%Y"
+    date_format = slashedDateFormat
     a = dt.datetime.strftime(effective_dod_obj, date_format)
-    a = dt.datetime.strptime(a, '%m/%d/%Y').date()
+    a = dt.datetime.strptime(a, date_format).date()
     b = dt.datetime.strftime(dob_obj, date_format)
-    b = dt.datetime.strptime(b, '%m/%d/%Y').date()
+    b = dt.datetime.strptime(b, date_format).date()
 
     return ((a-b).days)
 
@@ -144,18 +148,14 @@ def calcWeightedMean(list):
         total = total + (row[livedDaysIndex] * weight)
         count = count + (weight)
 
+    # print('Mean is - ', (total/count))
     return (total/count)
 
 def calcMedian(list):
-    print("test Median")
     display(pandas.DataFrame(list))
 
     # Sorting the list as per ascending order of number of days lived
     list2 = sorted(list, key=itemgetter(headerIndexDict['lived_days']))
-
-    for row in list2:
-        print(row)
-
     length = len(list2)
 
     medianEl1 = 0
@@ -171,8 +171,7 @@ def calcMedian(list):
     val2 = list2[medianEl2][headerIndexDict['lived_days']]
 
     median = (val1 + val2) / 2
-    
-    print('median days lived', median)
+    # print('Median is - ', median)
     return median
 
 def calcMode(list):
@@ -181,7 +180,7 @@ def calcMode(list):
         listDays.append(row[headerIndexDict['lived_days']])
 
     modeVal = mode(listDays)
-    print('Mode is - ', modeVal)
+    # print('Mode is - ', modeVal)
     print('** Mode prints the highest occuring value, if all are distinct, it selects the first values as puts that up as the mode **')
     return modeVal
     
@@ -193,7 +192,7 @@ def calcMax(list):
         livedDays = row[livedDaysIndex]
         if (livedDays > max) :
             max = livedDays
-    print("Maximum ", max)
+    # print("Maximum ", max)
     return max
 
 def calcMin(list):
@@ -203,7 +202,7 @@ def calcMin(list):
         livedDays = row[livedDaysIndex]
         if (livedDays < min) :
             min = livedDays
-    print("Minimum ", min)
+    # print("Minimum ", min)
     return min
 
 def calcSD(list):
@@ -216,7 +215,7 @@ def calcSD(list):
     
     before_root_val = sigmaVal / (len(list) - 1)
     standard_deviation = (before_root_val ** 0.5)
-    print('Standard Deviation ', standard_deviation)
+    # print('Standard Deviation ', standard_deviation)
     return standard_deviation
 
 def prettyPrintStatistics(mean, weighted_mean, median, mode, max, min, standard_deviation):
@@ -298,7 +297,7 @@ def main():
 
     # Initializing dictionary to store the indices of the new columns
     i=0
-    for (val) in header:
+    for val in header:
         headerIndexDict[val] = i
         i = i + 1
 
@@ -306,12 +305,12 @@ def main():
     rows = populate_data(header, rows)
 
     leastLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']))
-    print('Least Lived Presidents')
+    # print('Least Lived Presidents')
     prettyPrintPrezList(header, leastLivedPrez)
-    print('\n')
+    # print('\n')
     
     mostLivedPrez = sorted(rows, key=itemgetter(headerIndexDict['lived_days']), reverse=True)
-    print('Most Lived Presidents')
+    # print('Most Lived Presidents')
     prettyPrintPrezList(header, mostLivedPrez)
 
     mean = calcMean(rows)
